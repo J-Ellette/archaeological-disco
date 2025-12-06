@@ -3,6 +3,7 @@
 An interactive web application for exploring archaeological sites and discoveries through satellite imagery, elevation data visualization, and area-of-interest selection for potential archaeological features.
 
 **Experience Qualities**:
+
 1. **Exploratory** - Users should feel like discoverers, freely navigating maps and uncovering hidden archaeological patterns through interactive visualization tools.
 2. **Scientific** - The interface should convey precision and data-driven insights with technical overlays, measurement tools, and analytical visualization modes.
 3. **Immersive** - Rich map interactions, smooth transitions, and layered data visualizations should create an engaging exploration experience.
@@ -13,6 +14,7 @@ This app provides interactive mapping with drawing tools, layer management, site
 ## Essential Features
 
 ### Interactive Map with AOI Drawing
+
 - **Functionality**: Leaflet-based map allowing users to draw rectangles and polygons to define Areas of Interest (AOI)
 - **Purpose**: Enable precise geographic selection for archaeological feature analysis
 - **Trigger**: User clicks "Draw AOI" button or selects drawing tool from toolbar
@@ -20,6 +22,7 @@ This app provides interactive mapping with drawing tools, layer management, site
 - **Success criteria**: AOI shapes persist across sessions, show area calculations, and can be edited or removed
 
 ### Multi-Layer Visualization
+
 - **Functionality**: Toggle between satellite imagery, topographic maps, terrain visualization, LiDAR, and custom map sources; upload georeferenced map images as overlays
 - **Purpose**: Reveal different landscape features that might indicate archaeological sites and allow use of specialized datasets
 - **Trigger**: User selects layer from layer control panel or clicks Layers button to manage custom sources
@@ -27,6 +30,7 @@ This app provides interactive mapping with drawing tools, layer management, site
 - **Success criteria**: Smooth layer transitions, multiple simultaneous overlays, intuitive controls, custom sources persist across sessions
 
 ### Custom Map Sources
+
 - **Functionality**: Add custom tile servers (XYZ), WMS services, or API endpoints as map layers; configure attribution, zoom levels, and other parameters
 - **Purpose**: Enable use of specialized archaeological datasets, historical maps, or proprietary imagery sources
 - **Trigger**: User clicks "Layers" button then "Add Custom Map Source"
@@ -34,6 +38,7 @@ This app provides interactive mapping with drawing tools, layer management, site
 - **Success criteria**: Custom sources work reliably, persist across sessions, can be edited or deleted, clear error handling for invalid URLs
 
 ### Map Image Upload
+
 - **Functionality**: Upload georeferenced images (historical maps, survey imagery, etc.) with specified geographic bounds to overlay on the map
 - **Purpose**: Allow users to work with custom imagery, historical maps, or specialized datasets not available via tile services
 - **Trigger**: User clicks "Layers" button then "Upload Map Image"
@@ -41,6 +46,7 @@ This app provides interactive mapping with drawing tools, layer management, site
 - **Success criteria**: Images upload reliably (max 10MB), overlays render at correct positions, multiple overlays can be active, overlays persist in browser storage
 
 ### Archaeological Site Database
+
 - **Functionality**: Display known archaeological sites as markers on the map with detailed information panels
 - **Purpose**: Provide context and reference points for exploration
 - **Trigger**: Sites load automatically on map; user clicks marker for details
@@ -48,6 +54,7 @@ This app provides interactive mapping with drawing tools, layer management, site
 - **Success criteria**: Markers are clearly visible, info panels are informative, filtering works instantly
 
 ### Elevation Analysis Tools
+
 - **Functionality**: Show elevation profiles, slope analysis, and aspect visualization for selected areas
 - **Purpose**: Identify terrain features that might indicate buried structures or earthworks
 - **Trigger**: User selects analysis tool and clicks on map
@@ -55,6 +62,7 @@ This app provides interactive mapping with drawing tools, layer management, site
 - **Success criteria**: Accurate elevation data, clear visualizations, responsive interactions
 
 ### Discovery Manager
+
 - **Functionality**: Save AOIs, notes, and observations; organize discoveries into collections
 - **Purpose**: Allow users to track and manage their archaeological exploration findings
 - **Trigger**: User clicks "Save Discovery" after drawing AOI or adding notes
@@ -83,13 +91,15 @@ The design should evoke a sense of scientific discovery merged with ancient hist
 
 **Primary Color**: Deep Archaeological Terracotta (oklch(0.45 0.12 35)) - Evokes ancient pottery and earthenware, represents the earth and archaeological excavations; used for primary actions and key interactive elements.
 
-**Secondary Colors**: 
+**Secondary Colors**:
+
 - Topographic Moss (oklch(0.55 0.10 140)) - Represents vegetation-covered ruins and terrain mapping; used for success states and terrain overlays
 - Stone Gray (oklch(0.35 0.02 265)) - Represents ancient stone and archaeological structures; used for secondary UI elements and borders
 
 **Accent Color**: Discovery Gold (oklch(0.72 0.15 80)) - Bright highlight reminiscent of treasure and important finds; used for CTAs, selected states, and active tools.
 
 **Foreground/Background Pairings**:
+
 - Background (Parchment Cream oklch(0.97 0.02 75)): Dark text (oklch(0.25 0.02 35)) - Ratio 12.1:1 ✓
 - Primary (Terracotta oklch(0.45 0.12 35)): White text (oklch(1 0 0)) - Ratio 5.8:1 ✓
 - Accent (Gold oklch(0.72 0.15 80)): Dark text (oklch(0.25 0.02 35)) - Ratio 6.9:1 ✓
@@ -103,6 +113,7 @@ Typefaces should convey technical precision while maintaining readability for bo
 **Secondary Font**: Newsreader - An elegant serif for archaeological site descriptions and historical content, providing contrast and sophistication
 
 **Typographic Hierarchy**:
+
 - H1 (Page Title): Space Grotesk Bold/32px/tight tracking (-0.02em)
 - H2 (Section Headers): Space Grotesk SemiBold/24px/normal tracking
 - H3 (Card Titles): Space Grotesk Medium/18px/normal tracking
@@ -118,6 +129,7 @@ Animations should enhance the feeling of exploration and discovery while maintai
 ## Component Selection
 
 **Components**:
+
 - **Card**: Site information panels, discovery cards, analysis result displays - elevated with subtle shadows and terracotta accent borders
 - **Sheet**: Sliding panels for discovery manager and detailed site information - slides from right with backdrop
 - **Dialog**: Modals for saving discoveries, confirming deletions, and data export options
@@ -131,17 +143,20 @@ Animations should enhance the feeling of exploration and discovery while maintai
 - **Separator**: Divide sections in panels and toolbars with subtle stone-gray lines
 
 **Customizations**:
+
 - Custom map marker icons using Phosphor icons (MapPin, Compass, Cube for different site types)
 - Custom drawing toolbar with archaeological-themed icons
 - Topographic contour pattern background using CSS gradients for hero sections
 - Custom scrollbar styling for panels to match terracotta theme
 
 **States**:
+
 - Buttons: Default with subtle shadow, hover lifts slightly, active state compresses, disabled at 40% opacity with cursor not-allowed
 - Inputs: Default with stone border, focus shows terracotta ring with 2px width, error state with red ring and icon, success with moss green
 - Tool toggles: Inactive ghost state, active with terracotta background and white icon, hover shows background preview
 
 **Icon Selection**:
+
 - MapPin for site markers, PushPin for saved locations
 - CursorClick for draw tools, Selection for AOI operations
 - Mountains for terrain layers, Globe for satellite
@@ -156,6 +171,7 @@ Animations should enhance the feeling of exploration and discovery while maintai
 - Trash for deleting sources and uploads
 
 **Spacing**:
+
 - Panel padding: p-6 (24px) for main containers, p-4 (16px) for nested sections
 - Card spacing: gap-4 between elements, gap-6 between cards in grid
 - Form fields: gap-2 for label-input pairs, gap-4 between field groups
@@ -163,6 +179,7 @@ Animations should enhance the feeling of exploration and discovery while maintai
 - Map controls: Positioned with m-4 from edges, gap-3 between control clusters
 
 **Mobile**:
+
 - Stack toolbar vertically on left side instead of horizontal top bar
 - Collapsible panels that slide from bottom on mobile (Sheet component)
 - Larger touch targets (min 44px) for map controls and drawing tools

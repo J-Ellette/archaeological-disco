@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useLocalStorage } from '@/hooks/use-local-storage'
 import { Map } from '@/components/Map'
 import { SiteInfoSheet } from '@/components/SiteInfoSheet'
 import { DiscoveryManager } from '@/components/DiscoveryManager'
@@ -24,9 +24,9 @@ import {
 } from '@phosphor-icons/react'
 
 function App() {
-  const [discoveries, setDiscoveries] = useKV<Discovery[]>('discoveries', [])
-  const [customSources, setCustomSources] = useKV<CustomMapSource[]>('custom-sources', [])
-  const [uploadedMaps, setUploadedMaps] = useKV<UploadedMap[]>('uploaded-maps', [])
+  const [discoveries, setDiscoveries] = useLocalStorage<Discovery[]>('discoveries', [])
+  const [customSources, setCustomSources] = useLocalStorage<CustomMapSource[]>('custom-sources', [])
+  const [uploadedMaps, setUploadedMaps] = useLocalStorage<UploadedMap[]>('uploaded-maps', [])
   const [selectedSite, setSelectedSite] = useState<ArchaeologicalSite | null>(null)
   const [siteSheetOpen, setSiteSheetOpen] = useState(false)
   const [discoveryManagerOpen, setDiscoveryManagerOpen] = useState(false)
