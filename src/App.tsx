@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { useState } from 'react'
 import { useLocalStorage } from '@/hooks/use-local-storage'
+=======
+import { useState, useEffect } from 'react'
+import { useKV } from '@github/spark/hooks'
+>>>>>>> 7b05a1aaec880953619a31d95c22b6cc0510662f
 import { Map } from '@/components/Map'
 import { SiteInfoSheet } from '@/components/SiteInfoSheet'
 import { DiscoveryManager } from '@/components/DiscoveryManager'
@@ -9,24 +14,38 @@ import { AddMapSourceDialog } from '@/components/AddMapSourceDialog'
 import { UploadMapDialog } from '@/components/UploadMapDialog'
 import { ExportCollectionDialog } from '@/components/ExportCollectionDialog'
 import { ImportCollectionDialog } from '@/components/ImportCollectionDialog'
+import { PublishCollectionDialog } from '@/components/PublishCollectionDialog'
+import { MarketplaceSheet } from '@/components/MarketplaceSheet'
+import { ListingDetailsDialog } from '@/components/ListingDetailsDialog'
 import { Button } from '@/components/ui/button'
 import { Toaster, toast } from 'sonner'
-import { ArchaeologicalSite, Discovery, CustomMapSource, UploadedMap, MapCollection } from '@/lib/types'
+import { ArchaeologicalSite, Discovery, CustomMapSource, UploadedMap, MapCollection, MarketplaceListing, UserRating } from '@/lib/types'
 import { archaeologicalSites } from '@/lib/archaeological-sites'
 import { calculateAreaFromBounds } from '@/lib/geo-utils'
-import { mergeCollections } from '@/lib/collection-utils'
+import { mergeCollections, exportCollection } from '@/lib/collection-utils'
+import { createMarketplaceListing, calculateAverageRating } from '@/lib/marketplace-utils'
 import {
   CursorClick,
   FolderOpen,
   List,
   X,
-  Stack
+  Stack,
+  Storefront,
+  Upload
 } from '@phosphor-icons/react'
 
 function App() {
+<<<<<<< HEAD
   const [discoveries, setDiscoveries] = useLocalStorage<Discovery[]>('discoveries', [])
   const [customSources, setCustomSources] = useLocalStorage<CustomMapSource[]>('custom-sources', [])
   const [uploadedMaps, setUploadedMaps] = useLocalStorage<UploadedMap[]>('uploaded-maps', [])
+=======
+  const [discoveries, setDiscoveries] = useKV<Discovery[]>('discoveries', [])
+  const [customSources, setCustomSources] = useKV<CustomMapSource[]>('custom-sources', [])
+  const [uploadedMaps, setUploadedMaps] = useKV<UploadedMap[]>('uploaded-maps', [])
+  const [marketplaceListings, setMarketplaceListings] = useKV<MarketplaceListing[]>('marketplace-listings', [])
+  const [userRatings, setUserRatings] = useKV<UserRating[]>('user-ratings', [])
+>>>>>>> 7b05a1aaec880953619a31d95c22b6cc0510662f
   const [selectedSite, setSelectedSite] = useState<ArchaeologicalSite | null>(null)
   const [siteSheetOpen, setSiteSheetOpen] = useState(false)
   const [discoveryManagerOpen, setDiscoveryManagerOpen] = useState(false)
@@ -35,6 +54,10 @@ function App() {
   const [uploadMapDialogOpen, setUploadMapDialogOpen] = useState(false)
   const [exportCollectionOpen, setExportCollectionOpen] = useState(false)
   const [importCollectionOpen, setImportCollectionOpen] = useState(false)
+  const [publishCollectionOpen, setPublishCollectionOpen] = useState(false)
+  const [marketplaceOpen, setMarketplaceOpen] = useState(false)
+  const [listingDetailsOpen, setListingDetailsOpen] = useState(false)
+  const [selectedListing, setSelectedListing] = useState<MarketplaceListing | null>(null)
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
   const [drawMode, setDrawMode] = useState<'none' | 'rectangle'>('none')
   const [pendingBounds, setPendingBounds] = useState<{
@@ -44,6 +67,18 @@ function App() {
     west: number
   } | null>(null)
   const [sitesVisible, setSitesVisible] = useState(true)
+  const [currentUser, setCurrentUser] = useState<{ login: string; avatarUrl: string } | null>(null)
+
+  useEffect(() => {
+    window.spark.user().then((user) => {
+      if (user) {
+        setCurrentUser({
+          login: user.login,
+          avatarUrl: user.avatarUrl,
+        })
+      }
+    })
+  }, [])
 
   const handleSiteClick = (site: ArchaeologicalSite) => {
     setSelectedSite(site)
@@ -151,6 +186,84 @@ function App() {
     }
   }
 
+  const handlePublishCollection = async (data: { name: string; description: string; tags: string[] }) => {
+    if (!currentUser) {
+      toast.error('You must be logged in to publish collections')
+      return
+    }
+
+    const collection = exportCollection(
+      data.name,
+      customSources || [],
+      uploadedMaps || [],
+      data.description
+    )
+
+    const listing = await createMarketplaceListing(collection, currentUser, data.tags)
+
+    setMarketplaceListings((current) => [...(current || []), listing])
+    setPublishCollectionOpen(false)
+    toast.success('Collection published to marketplace!')
+  }
+
+  const handleInstallListing = (listing: MarketplaceListing) => {
+    handleImportCollection(listing.collection, {
+      skipDuplicates: true,
+      renameConflicts: true,
+    })
+
+    setMarketplaceListings((current) =>
+      (current || []).map((l) =>
+        l.id === listing.id ? { ...l, downloads: l.downloads + 1 } : l
+      )
+    )
+
+    setListingDetailsOpen(false)
+    setMarketplaceOpen(false)
+    toast.success(`Installed "${listing.name}"`)
+  }
+
+  const handleViewListingDetails = (listing: MarketplaceListing) => {
+    setSelectedListing(listing)
+    setListingDetailsOpen(true)
+  }
+
+  const handleRateListing = async (rating: number) => {
+    if (!currentUser || !selectedListing) return
+
+    const userId = currentUser.login
+
+    const newRating: UserRating = {
+      listingId: selectedListing.id,
+      userId,
+      rating,
+      createdAt: Date.now(),
+    }
+
+    setUserRatings((current) => {
+      const filtered = (current || []).filter(
+        (r) => !(r.listingId === selectedListing.id && r.userId === userId)
+      )
+      return [...filtered, newRating]
+    })
+
+    setMarketplaceListings((current) => {
+      return (current || []).map((listing) => {
+        if (listing.id === selectedListing.id) {
+          const allRatings = [
+            ...(userRatings || []).filter((r) => r.listingId === listing.id && r.userId !== userId),
+            newRating,
+          ]
+          const { average, count } = calculateAverageRating(allRatings)
+          return { ...listing, rating: average, ratingCount: count }
+        }
+        return listing
+      })
+    })
+
+    toast.success(`Rated ${rating} stars`)
+  }
+
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
       <Toaster position="top-center" />
@@ -162,6 +275,30 @@ function App() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setMarketplaceOpen(true)}
+          >
+            <Storefront className="w-4 h-4" />
+            <span className="ml-2 hidden sm:inline">Marketplace</span>
+            {(marketplaceListings && marketplaceListings.length > 0) && (
+              <span className="ml-1.5 bg-accent text-accent-foreground rounded-full px-1.5 py-0.5 text-xs font-semibold">
+                {marketplaceListings.length}
+              </span>
+            )}
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPublishCollectionOpen(true)}
+            disabled={!customSources?.length && !uploadedMaps?.length}
+          >
+            <Upload className="w-4 h-4" />
+            <span className="ml-2 hidden sm:inline">Publish</span>
+          </Button>
+
           <Button
             variant={sitesVisible ? 'default' : 'outline'}
             size="sm"
@@ -301,6 +438,37 @@ function App() {
         open={importCollectionOpen}
         onOpenChange={setImportCollectionOpen}
         onImport={handleImportCollection}
+      />
+
+      <PublishCollectionDialog
+        open={publishCollectionOpen}
+        onOpenChange={setPublishCollectionOpen}
+        customSourcesCount={customSources?.length || 0}
+        uploadedMapsCount={uploadedMaps?.length || 0}
+        onPublish={handlePublishCollection}
+      />
+
+      <MarketplaceSheet
+        open={marketplaceOpen}
+        onOpenChange={setMarketplaceOpen}
+        listings={marketplaceListings || []}
+        onInstall={handleInstallListing}
+        onViewDetails={handleViewListingDetails}
+      />
+
+      <ListingDetailsDialog
+        open={listingDetailsOpen}
+        onOpenChange={setListingDetailsOpen}
+        listing={selectedListing}
+        userRating={
+          currentUser && selectedListing
+            ? (userRatings || []).find(
+                (r) => r.listingId === selectedListing.id && r.userId === currentUser.login
+              )
+            : undefined
+        }
+        onInstall={handleInstallListing}
+        onRate={currentUser ? handleRateListing : undefined}
       />
     </div>
   )

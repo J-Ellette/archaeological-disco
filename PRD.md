@@ -69,6 +69,13 @@ This app provides interactive mapping with drawing tools, layer management, site
 - **Progression**: User draws AOI → Clicks Save → Modal appears for details → User adds title/notes/tags → Saves to collection → Appears in discoveries list → Can review/edit later
 - **Success criteria**: All discoveries persist across sessions, can be filtered and searched, exportable as GeoJSON
 
+### Collection Marketplace
+- **Functionality**: Publish map collections to a shared marketplace; browse, search, and install collections created by other users; rate and review collections
+- **Purpose**: Enable community sharing of curated map sources, historical overlays, and specialized archaeological datasets
+- **Trigger**: User clicks "Marketplace" button to browse; clicks "Publish" button to share their collection
+- **Progression**: Browse: User opens marketplace → Searches/filters collections → Views listing details → Sees included sources/maps → Installs collection → Sources merge with existing data; Publish: User clicks publish → Names collection → Adds description/tags → Publishes to marketplace → Others can discover and install
+- **Success criteria**: Marketplace browsing is smooth and responsive; search/filtering works accurately; published collections display author info; install process handles duplicates gracefully; ratings reflect user feedback
+
 ## Edge Case Handling
 
 - **No GPS/Location**: App loads with default view of famous archaeological region (Angkor Wat area); users can navigate manually
@@ -82,6 +89,10 @@ This app provides interactive mapping with drawing tools, layer management, site
 - **Invalid Map Bounds**: Validate that north > south and east > west; provide helpful error messages with coordinate format examples
 - **Missing Custom Source URLs**: Validate URL format before saving; test tile URLs when possible; show clear error states for unreachable sources
 - **Custom Source Conflicts**: Allow multiple custom sources with same base URL but different parameters; clear naming to avoid confusion
+- **Empty Marketplace**: Show encouraging message when no collections are published yet; invite users to be first
+- **Marketplace Installation Conflicts**: Handle duplicate sources/maps gracefully with clear merge options and preview of what will be added
+- **Rating Without Login**: Prompt users to authenticate before rating collections
+- **Publishing Empty Collections**: Disable publish button when no custom sources or maps are available
 
 ## Design Direction
 
@@ -166,9 +177,14 @@ Animations should enhance the feeling of exploration and discovery while maintai
 - SlidersHorizontal for layer controls, Eye/EyeSlash for visibility toggles
 - Stack for layers manager button
 - Plus for adding new sources/uploads
-- Upload for uploading map images
+- Upload for uploading map images and publishing collections
 - Image for uploaded map overlays
 - Trash for deleting sources and uploads
+- Storefront for marketplace access
+- Sparkle for marketplace highlights and featured collections
+- Star for ratings
+- TrendUp for popular/trending sort
+- Clock for newest sort
 
 **Spacing**:
 
