@@ -70,6 +70,7 @@ This app provides interactive mapping with drawing tools, layer management, site
 - **Success criteria**: All discoveries persist across sessions, can be filtered and searched, exportable as GeoJSON
 
 ### Collection Marketplace
+
 - **Functionality**: Publish map collections to a shared marketplace; browse, search, and install collections created by other users; rate and review collections
 - **Purpose**: Enable community sharing of curated map sources, historical overlays, and specialized archaeological datasets
 - **Trigger**: User clicks "Marketplace" button to browse; clicks "Publish" button to share their collection

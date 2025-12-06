@@ -140,6 +140,7 @@ export function UploadMapDialog({ open, onOpenChange, onUpload }: UploadMapDialo
                 accept="image/*"
                 className="hidden"
                 onChange={handleFileSelect}
+                aria-label="Choose map image file"
               />
             </div>
             {dataUrl && (

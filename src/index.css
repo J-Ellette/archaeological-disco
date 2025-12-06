@@ -1,8 +1,11 @@
 @import 'tailwindcss';
+@import 'tailwindcss/utilities';
 @import "tw-animate-css";
 
 @layer base {
   * {
+    /* stylelint-disable-next-line at-rule-no-unknown */
+    /* @apply border-border; */
     @apply border-border;
   }
   
@@ -45,6 +48,8 @@
   --topographic-green: oklch(0.55 0.10 140);
 }
 
+/* stylelint-disable-next-line at-rule-no-unknown */
+/* @theme is a Tailwind CSS v4 directive */
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -77,6 +82,19 @@
 .leaflet-container {
   font-family: 'Space Grotesk', sans-serif;
   background: oklch(0.90 0.02 200);
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure Leaflet controls don't interfere with modals */
+.leaflet-control-container {
+  position: relative;
+  z-index: 100;
+}
+
+/* Ensure Leaflet popups don't interfere with modals */
+.leaflet-popup-pane {
+  z-index: 700 !important;
 }
 
 .leaflet-tooltip {
@@ -92,6 +110,7 @@
 }
 
 .leaflet-tooltip-top:before {
+  border-top-color: rgb(63, 63, 63) !important;
   border-top-color: oklch(0.25 0.02 35) !important;
 }
 

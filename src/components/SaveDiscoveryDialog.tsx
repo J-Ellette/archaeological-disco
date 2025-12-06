@@ -105,6 +105,8 @@ export function SaveDiscoveryDialog({ open, onOpenChange, onSave, area }: SaveDi
                       <button
                         onClick={() => removeTag(tag)}
                         className="ml-1 hover:text-destructive"
+                        title={`Remove ${tag} tag`}
+                        aria-label={`Remove ${tag} tag`}
                       >
                         <X className="w-3 h-3" />
                       </button>

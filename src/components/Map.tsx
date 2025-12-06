@@ -214,6 +214,9 @@ export function Map({ sites, onSiteClick, onBoundsDrawn, drawMode, selectedSiteI
       }
     } else {
       map.getContainer().style.cursor = ''
+      return () => {
+        // Cleanup function for when not in rectangle mode
+      }
     }
   }, [drawMode, onBoundsDrawn])
 

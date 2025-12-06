@@ -6,7 +6,9 @@
 /*
   ---break---
 */
-@custom-variant dark (&:is(.dark *));
+/* @custom-variant dark (&:is(.dark *)); */
+/* stylelint-disable-next-line at-rule-no-unknown */
+@variant dark (&:is(.dark *));
 
 @config '../tailwind.config.js';
 

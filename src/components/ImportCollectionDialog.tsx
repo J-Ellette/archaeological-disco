@@ -97,6 +97,7 @@ export function ImportCollectionDialog({
                 onChange={handleFileSelect}
                 className="hidden"
                 id="collection-file-input"
+                title="Select collection file"
               />
               <Button
                 variant="outline"

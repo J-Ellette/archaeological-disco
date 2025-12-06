@@ -64,6 +64,7 @@ export async function importCollectionFromFile(file: File): Promise<MapCollectio
 export function validateCollection(data: any): data is MapCollection {
   return (
     typeof data === 'object' &&
+    data !== null &&
     typeof data.id === 'string' &&
     typeof data.name === 'string' &&
     typeof data.version === 'string' &&

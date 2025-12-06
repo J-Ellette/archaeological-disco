@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { MapCollection } from '@/lib/types'
 import {
   Dialog,
   DialogContent,
@@ -155,6 +154,7 @@ export function PublishCollectionDialog({
                     <button
                       onClick={() => removeTag(tag)}
                       className="hover:text-destructive transition-colors"
+                      aria-label={`Remove ${tag} tag`}
                     >
                       <X className="w-3 h-3" />
                     </button>

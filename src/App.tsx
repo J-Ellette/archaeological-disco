@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useState } from 'react'
+import { useLocalStorage } from '@/hooks/use-local-storage'
 import { Map } from '@/components/Map'
 import { SiteInfoSheet } from '@/components/SiteInfoSheet'
 import { DiscoveryManager } from '@/components/DiscoveryManager'
@@ -30,11 +30,11 @@ import {
 } from '@phosphor-icons/react'
 
 function App() {
-  const [discoveries, setDiscoveries] = useKV<Discovery[]>('discoveries', [])
-  const [customSources, setCustomSources] = useKV<CustomMapSource[]>('custom-sources', [])
-  const [uploadedMaps, setUploadedMaps] = useKV<UploadedMap[]>('uploaded-maps', [])
-  const [marketplaceListings, setMarketplaceListings] = useKV<MarketplaceListing[]>('marketplace-listings', [])
-  const [userRatings, setUserRatings] = useKV<UserRating[]>('user-ratings', [])
+  const [discoveries, setDiscoveries] = useLocalStorage<Discovery[]>('discoveries', [])
+  const [customSources, setCustomSources] = useLocalStorage<CustomMapSource[]>('custom-sources', [])
+  const [uploadedMaps, setUploadedMaps] = useLocalStorage<UploadedMap[]>('uploaded-maps', [])
+  const [marketplaceListings, setMarketplaceListings] = useLocalStorage<MarketplaceListing[]>('marketplace-listings', [])
+  const [userRatings, setUserRatings] = useLocalStorage<UserRating[]>('user-ratings', [])
   const [selectedSite, setSelectedSite] = useState<ArchaeologicalSite | null>(null)
   const [siteSheetOpen, setSiteSheetOpen] = useState(false)
   const [discoveryManagerOpen, setDiscoveryManagerOpen] = useState(false)
@@ -56,18 +56,11 @@ function App() {
     west: number
   } | null>(null)
   const [sitesVisible, setSitesVisible] = useState(true)
-  const [currentUser, setCurrentUser] = useState<{ login: string; avatarUrl: string } | null>(null)
-
-  useEffect(() => {
-    (window as any).spark.user().then((user: any) => {
-      if (user) {
-        setCurrentUser({
-          login: user.login,
-          avatarUrl: user.avatarUrl,
-        })
-      }
-    })
-  }, [])
+  // Default user - replace with actual authentication later
+  const currentUser = {
+    login: 'archaeologist',
+    avatarUrl: 'https://via.placeholder.com/40?text=A'
+  }
 
   const handleSiteClick = (site: ArchaeologicalSite) => {
     setSelectedSite(site)

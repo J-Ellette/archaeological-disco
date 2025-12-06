@@ -27,7 +27,6 @@ import {
   Star,
   MapPin,
   Image,
-  X,
   Sparkle,
   TrendUp,
   Clock,

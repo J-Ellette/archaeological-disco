@@ -3,7 +3,6 @@ import { MarketplaceListing, UserRating } from '@/lib/types'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -20,7 +19,6 @@ import {
   Image,
   Calendar,
   Globe,
-  X,
 } from '@phosphor-icons/react'
 
 interface ListingDetailsDialogProps {
@@ -205,6 +203,7 @@ export function ListingDetailsDialog({
                       onMouseEnter={() => setHoveredRating(rating)}
                       onMouseLeave={() => setHoveredRating(0)}
                       className="transition-transform hover:scale-110"
+                      aria-label={`Rate ${rating} star${rating !== 1 ? 's' : ''}`}
                     >
                       <Star
                         className="w-6 h-6"

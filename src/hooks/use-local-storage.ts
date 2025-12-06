@@ -29,27 +29,37 @@ export function useLocalStorage<T>(key: string, defaultValue: T): [T, React.Disp
           ? (newValue as (prev: T) => T)(currentValue) 
           : newValue
         
-        if (valueToStore === undefined) {
-          window.localStorage.removeItem(key)
-        } else {
-          window.localStorage.setItem(key, JSON.stringify(valueToStore))
+        try {
+          if (valueToStore === undefined) {
+            window.localStorage.removeItem(key)
+          } else {
+            window.localStorage.setItem(key, JSON.stringify(valueToStore))
+          }
+        } catch (storageError) {
+          console.warn(`Error setting localStorage key "${key}":`, storageError)
+          // Don't throw - just continue with the state update
         }
         
         return valueToStore
       })
     } catch (error) {
-      console.warn(`Error setting localStorage key "${key}":`, error)
+      console.warn(`Error updating state for localStorage key "${key}":`, error)
     }
   }, [key])
 
   // Listen for changes from other tabs/windows
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === key && e.newValue !== null) {
-        try {
-          setValue(JSON.parse(e.newValue))
-        } catch (error) {
-          console.warn(`Error parsing storage event for key "${key}":`, error)
+      if (e.key === key) {
+        if (e.newValue === null) {
+          // Key was deleted, revert to default value
+          setValue(defaultValue)
+        } else {
+          try {
+            setValue(JSON.parse(e.newValue))
+          } catch (error) {
+            console.warn(`Error parsing storage event for key "${key}":`, error)
+          }
         }
       }
     }
