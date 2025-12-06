@@ -4,24 +4,32 @@ import { Map } from '@/components/Map'
 import { SiteInfoSheet } from '@/components/SiteInfoSheet'
 import { DiscoveryManager } from '@/components/DiscoveryManager'
 import { SaveDiscoveryDialog } from '@/components/SaveDiscoveryDialog'
+import { MapLayersSheet } from '@/components/MapLayersSheet'
+import { AddMapSourceDialog } from '@/components/AddMapSourceDialog'
+import { UploadMapDialog } from '@/components/UploadMapDialog'
 import { Button } from '@/components/ui/button'
 import { Toaster, toast } from 'sonner'
-import { ArchaeologicalSite, Discovery } from '@/lib/types'
+import { ArchaeologicalSite, Discovery, CustomMapSource, UploadedMap } from '@/lib/types'
 import { archaeologicalSites } from '@/lib/archaeological-sites'
 import { calculateAreaFromBounds } from '@/lib/geo-utils'
 import {
   CursorClick,
-  BookmarkSimple,
   FolderOpen,
   List,
-  X
+  X,
+  Stack
 } from '@phosphor-icons/react'
 
 function App() {
   const [discoveries, setDiscoveries] = useKV<Discovery[]>('discoveries', [])
+  const [customSources, setCustomSources] = useKV<CustomMapSource[]>('custom-sources', [])
+  const [uploadedMaps, setUploadedMaps] = useKV<UploadedMap[]>('uploaded-maps', [])
   const [selectedSite, setSelectedSite] = useState<ArchaeologicalSite | null>(null)
   const [siteSheetOpen, setSiteSheetOpen] = useState(false)
   const [discoveryManagerOpen, setDiscoveryManagerOpen] = useState(false)
+  const [mapLayersOpen, setMapLayersOpen] = useState(false)
+  const [addSourceDialogOpen, setAddSourceDialogOpen] = useState(false)
+  const [uploadMapDialogOpen, setUploadMapDialogOpen] = useState(false)
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
   const [drawMode, setDrawMode] = useState<'none' | 'rectangle'>('none')
   const [pendingBounds, setPendingBounds] = useState<{
@@ -80,6 +88,36 @@ function App() {
     setDrawMode((current) => (current === 'none' ? 'rectangle' : 'none'))
   }
 
+  const handleAddSource = (source: Omit<CustomMapSource, 'id' | 'createdAt'>) => {
+    const newSource: CustomMapSource = {
+      ...source,
+      id: `source-${Date.now()}`,
+      createdAt: Date.now()
+    }
+    setCustomSources((current) => [...(current || []), newSource])
+    toast.success('Map source added successfully!')
+  }
+
+  const handleUploadMap = (map: Omit<UploadedMap, 'id' | 'createdAt'>) => {
+    const newMap: UploadedMap = {
+      ...map,
+      id: `map-${Date.now()}`,
+      createdAt: Date.now()
+    }
+    setUploadedMaps((current) => [...(current || []), newMap])
+    toast.success('Map uploaded successfully!')
+  }
+
+  const handleDeleteSource = (id: string) => {
+    setCustomSources((current) => (current || []).filter((s) => s.id !== id))
+    toast.success('Map source deleted')
+  }
+
+  const handleDeleteUpload = (id: string) => {
+    setUploadedMaps((current) => (current || []).filter((m) => m.id !== id))
+    toast.success('Map deleted')
+  }
+
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
       <Toaster position="top-center" />
@@ -99,6 +137,20 @@ function App() {
           >
             <List className="w-4 h-4" />
             <span className="ml-2">{sitesVisible ? 'Hide' : 'Show'} Sites</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setMapLayersOpen(true)}
+          >
+            <Stack className="w-4 h-4" />
+            <span className="ml-2 hidden sm:inline">Layers</span>
+            {((customSources && customSources.length > 0) || (uploadedMaps && uploadedMaps.length > 0)) && (
+              <span className="ml-1.5 bg-accent text-accent-foreground rounded-full px-1.5 py-0.5 text-xs font-semibold">
+                {(customSources?.length || 0) + (uploadedMaps?.length || 0)}
+              </span>
+            )}
           </Button>
 
           <Button
@@ -142,6 +194,8 @@ function App() {
           onBoundsDrawn={handleBoundsDrawn}
           drawMode={drawMode}
           selectedSiteId={selectedSite?.id}
+          customSources={customSources || []}
+          uploadedMaps={uploadedMaps || []}
         />
       </main>
 
@@ -164,6 +218,35 @@ function App() {
         onOpenChange={setSaveDialogOpen}
         onSave={handleSaveDiscovery}
         area={pendingBounds ? calculateAreaFromBounds(pendingBounds) : 0}
+      />
+
+      <MapLayersSheet
+        open={mapLayersOpen}
+        onOpenChange={setMapLayersOpen}
+        customSources={customSources || []}
+        uploadedMaps={uploadedMaps || []}
+        onDeleteSource={handleDeleteSource}
+        onDeleteUpload={handleDeleteUpload}
+        onAddSourceClick={() => {
+          setMapLayersOpen(false)
+          setAddSourceDialogOpen(true)
+        }}
+        onUploadMapClick={() => {
+          setMapLayersOpen(false)
+          setUploadMapDialogOpen(true)
+        }}
+      />
+
+      <AddMapSourceDialog
+        open={addSourceDialogOpen}
+        onOpenChange={setAddSourceDialogOpen}
+        onAdd={handleAddSource}
+      />
+
+      <UploadMapDialog
+        open={uploadMapDialogOpen}
+        onOpenChange={setUploadMapDialogOpen}
+        onUpload={handleUploadMap}
       />
     </div>
   )

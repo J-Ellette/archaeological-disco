@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { ArchaeologicalSite } from '@/lib/types'
+import { ArchaeologicalSite, CustomMapSource, UploadedMap } from '@/lib/types'
 
 interface MapProps {
   sites: ArchaeologicalSite[]
@@ -9,9 +9,11 @@ interface MapProps {
   onBoundsDrawn: (bounds: { north: number; south: number; east: number; west: number }) => void
   drawMode: 'none' | 'rectangle'
   selectedSiteId?: string
+  customSources: CustomMapSource[]
+  uploadedMaps: UploadedMap[]
 }
 
-const baseLayers = {
+const baseLayers: Record<string, { name: string; url: string; attribution: string; maxZoom?: number; minZoom?: number }> = {
   street: {
     name: 'Street',
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -34,12 +36,14 @@ const baseLayers = {
   }
 }
 
-export function Map({ sites, onSiteClick, onBoundsDrawn, drawMode, selectedSiteId }: MapProps) {
+export function Map({ sites, onSiteClick, onBoundsDrawn, drawMode, selectedSiteId, customSources, uploadedMaps }: MapProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
   const markersRef = useRef<{ [key: string]: L.Marker }>({})
   const rectangleRef = useRef<L.Rectangle | null>(null)
-  const [currentLayer, setCurrentLayer] = useState<'street' | 'satellite' | 'terrain' | 'lidar'>('terrain')
+  const imageOverlaysRef = useRef<{ [key: string]: L.ImageOverlay }>({})
+  const [currentLayer, setCurrentLayer] = useState<string>('terrain')
+  const [activeOverlays, setActiveOverlays] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return
@@ -76,11 +80,18 @@ export function Map({ sites, onSiteClick, onBoundsDrawn, drawMode, selectedSiteI
       }
     })
 
-    L.tileLayer(baseLayers[currentLayer].url, {
-      attribution: baseLayers[currentLayer].attribution,
-      maxZoom: 19
-    }).addTo(map)
-  }, [currentLayer])
+    const baseLayersArray = Object.entries(baseLayers).map(([key, value]) => ({ id: key, ...value }))
+    const allLayers = [...baseLayersArray, ...customSources]
+    const selectedSource = allLayers.find(layer => layer.id === currentLayer)
+
+    if (selectedSource && selectedSource.url) {
+      L.tileLayer(selectedSource.url, {
+        attribution: selectedSource.attribution || '',
+        maxZoom: selectedSource.maxZoom || 19,
+        minZoom: selectedSource.minZoom || 0
+      }).addTo(map)
+    }
+  }, [currentLayer, customSources])
 
   useEffect(() => {
     const map = mapInstanceRef.current
@@ -206,6 +217,43 @@ export function Map({ sites, onSiteClick, onBoundsDrawn, drawMode, selectedSiteI
     }
   }, [drawMode, onBoundsDrawn])
 
+  useEffect(() => {
+    const map = mapInstanceRef.current
+    if (!map) return
+
+    Object.values(imageOverlaysRef.current).forEach((overlay) => overlay.remove())
+    imageOverlaysRef.current = {}
+
+    uploadedMaps.forEach((uploadedMap) => {
+      if (activeOverlays.has(uploadedMap.id)) {
+        const bounds = L.latLngBounds(
+          [uploadedMap.bounds.south, uploadedMap.bounds.west],
+          [uploadedMap.bounds.north, uploadedMap.bounds.east]
+        )
+        
+        const overlay = L.imageOverlay(uploadedMap.dataUrl, bounds, {
+          opacity: 0.7,
+          interactive: true
+        })
+        
+        overlay.addTo(map)
+        imageOverlaysRef.current[uploadedMap.id] = overlay
+      }
+    })
+  }, [uploadedMaps, activeOverlays])
+
+  const toggleOverlay = (mapId: string) => {
+    setActiveOverlays((current) => {
+      const newSet = new Set(current)
+      if (newSet.has(mapId)) {
+        newSet.delete(mapId)
+      } else {
+        newSet.add(mapId)
+      }
+      return newSet
+    })
+  }
+
   return (
     <div className="relative w-full h-full">
       <div ref={mapRef} className="w-full h-full" />
@@ -215,7 +263,7 @@ export function Map({ sites, onSiteClick, onBoundsDrawn, drawMode, selectedSiteI
           {Object.entries(baseLayers).map(([key, layer]) => (
             <button
               key={key}
-              onClick={() => setCurrentLayer(key as typeof currentLayer)}
+              onClick={() => setCurrentLayer(key)}
               className={`px-4 py-2 text-sm font-medium transition-colors w-full text-left ${
                 currentLayer === key
                   ? 'bg-primary text-primary-foreground'
@@ -225,7 +273,41 @@ export function Map({ sites, onSiteClick, onBoundsDrawn, drawMode, selectedSiteI
               {layer.name}
             </button>
           ))}
+          {customSources.map((source) => (
+            <button
+              key={source.id}
+              onClick={() => setCurrentLayer(source.id)}
+              className={`px-4 py-2 text-sm font-medium transition-colors w-full text-left ${
+                currentLayer === source.id
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-card hover:bg-muted'
+              }`}
+            >
+              {source.name}
+            </button>
+          ))}
         </div>
+
+        {uploadedMaps.length > 0 && (
+          <div className="bg-card rounded-lg shadow-lg border border-border p-3">
+            <div className="text-xs font-semibold text-muted-foreground mb-2 px-1">Overlays</div>
+            <div className="space-y-1.5">
+              {uploadedMaps.map((map) => (
+                <button
+                  key={map.id}
+                  onClick={() => toggleOverlay(map.id)}
+                  className={`px-3 py-1.5 text-xs font-medium transition-colors w-full text-left rounded ${
+                    activeOverlays.has(map.id)
+                      ? 'bg-accent text-accent-foreground'
+                      : 'hover:bg-muted'
+                  }`}
+                >
+                  {map.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

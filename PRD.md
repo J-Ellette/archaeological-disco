@@ -20,11 +20,25 @@ This app provides interactive mapping with drawing tools, layer management, site
 - **Success criteria**: AOI shapes persist across sessions, show area calculations, and can be edited or removed
 
 ### Multi-Layer Visualization
-- **Functionality**: Toggle between satellite imagery, topographic maps, terrain visualization, and hillshade overlays
-- **Purpose**: Reveal different landscape features that might indicate archaeological sites
-- **Trigger**: User selects layer from layer control panel
-- **Progression**: User opens layer panel → Selects base layer or overlay → Map updates with transition → Multiple overlays can be combined → Opacity sliders adjust visibility
-- **Success criteria**: Smooth layer transitions, multiple simultaneous overlays, intuitive controls
+- **Functionality**: Toggle between satellite imagery, topographic maps, terrain visualization, LiDAR, and custom map sources; upload georeferenced map images as overlays
+- **Purpose**: Reveal different landscape features that might indicate archaeological sites and allow use of specialized datasets
+- **Trigger**: User selects layer from layer control panel or clicks Layers button to manage custom sources
+- **Progression**: User opens layer panel → Selects base layer or overlay → Map updates with transition → Multiple overlays can be combined → User can add custom tile servers or upload map images → Uploaded maps appear as toggleable overlays with opacity controls
+- **Success criteria**: Smooth layer transitions, multiple simultaneous overlays, intuitive controls, custom sources persist across sessions
+
+### Custom Map Sources
+- **Functionality**: Add custom tile servers (XYZ), WMS services, or API endpoints as map layers; configure attribution, zoom levels, and other parameters
+- **Purpose**: Enable use of specialized archaeological datasets, historical maps, or proprietary imagery sources
+- **Trigger**: User clicks "Layers" button then "Add Custom Map Source"
+- **Progression**: User opens layers manager → Clicks add source → Enters source details (name, type, URL, attribution) → Configures zoom levels → Saves source → Source appears in base layer list → Can be selected like built-in layers
+- **Success criteria**: Custom sources work reliably, persist across sessions, can be edited or deleted, clear error handling for invalid URLs
+
+### Map Image Upload
+- **Functionality**: Upload georeferenced images (historical maps, survey imagery, etc.) with specified geographic bounds to overlay on the map
+- **Purpose**: Allow users to work with custom imagery, historical maps, or specialized datasets not available via tile services
+- **Trigger**: User clicks "Layers" button then "Upload Map Image"
+- **Progression**: User opens layers manager → Clicks upload → Selects image file → Specifies geographic bounds (N/S/E/W coordinates) → Names the map → Uploads → Map appears in overlay list → User toggles overlay on/off → Overlay renders at correct geographic position
+- **Success criteria**: Images upload reliably (max 10MB), overlays render at correct positions, multiple overlays can be active, overlays persist in browser storage
 
 ### Archaeological Site Database
 - **Functionality**: Display known archaeological sites as markers on the map with detailed information panels
@@ -56,6 +70,10 @@ This app provides interactive mapping with drawing tools, layer management, site
 - **Slow Map Loading**: Display skeleton loaders for tiles; show progress indicator for data-heavy operations
 - **Invalid Coordinates**: Validate coordinate inputs and provide helpful error messages with format examples
 - **Export Failures**: Provide retry mechanism and fallback to clipboard copy for data export
+- **Large Image Files**: Limit uploads to 10MB; show clear error for oversized files with size information
+- **Invalid Map Bounds**: Validate that north > south and east > west; provide helpful error messages with coordinate format examples
+- **Missing Custom Source URLs**: Validate URL format before saving; test tile URLs when possible; show clear error states for unreachable sources
+- **Custom Source Conflicts**: Allow multiple custom sources with same base URL but different parameters; clear naming to avoid confusion
 
 ## Design Direction
 
@@ -131,6 +149,11 @@ Animations should enhance the feeling of exploration and discovery while maintai
 - BookmarkSimple for saving discoveries, FolderOpen for collections
 - Download for exports, MagnifyingGlass for search
 - SlidersHorizontal for layer controls, Eye/EyeSlash for visibility toggles
+- Stack for layers manager button
+- Plus for adding new sources/uploads
+- Upload for uploading map images
+- Image for uploaded map overlays
+- Trash for deleting sources and uploads
 
 **Spacing**:
 - Panel padding: p-6 (24px) for main containers, p-4 (16px) for nested sections

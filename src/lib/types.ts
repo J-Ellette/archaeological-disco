@@ -36,3 +36,34 @@ export interface MapLayer {
 }
 
 export type DrawMode = 'none' | 'rectangle' | 'polygon' | 'marker'
+
+export interface CustomMapSource {
+  id: string
+  name: string
+  type: 'tile' | 'wms' | 'image'
+  url: string
+  attribution?: string
+  maxZoom?: number
+  minZoom?: number
+  bounds?: {
+    north: number
+    south: number
+    east: number
+    west: number
+  }
+  createdAt: number
+}
+
+export interface UploadedMap {
+  id: string
+  name: string
+  fileName: string
+  dataUrl: string
+  bounds: {
+    north: number
+    south: number
+    east: number
+    west: number
+  }
+  createdAt: number
+}
