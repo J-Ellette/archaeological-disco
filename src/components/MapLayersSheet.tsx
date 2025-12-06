@@ -9,7 +9,9 @@ import {
   Upload,
   Globe,
   Image as ImageIcon,
-  Stack
+  Stack,
+  DownloadSimple,
+  UploadSimple
 } from '@phosphor-icons/react'
 
 interface MapLayersSheetProps {
@@ -21,6 +23,8 @@ interface MapLayersSheetProps {
   onDeleteUpload: (id: string) => void
   onAddSourceClick: () => void
   onUploadMapClick: () => void
+  onExportCollectionClick: () => void
+  onImportCollectionClick: () => void
 }
 
 export function MapLayersSheet({
@@ -31,8 +35,12 @@ export function MapLayersSheet({
   onDeleteSource,
   onDeleteUpload,
   onAddSourceClick,
-  onUploadMapClick
+  onUploadMapClick,
+  onExportCollectionClick,
+  onImportCollectionClick
 }: MapLayersSheetProps) {
+  const totalItems = customSources.length + uploadedMaps.length
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-[400px] sm:w-[540px]">
@@ -44,19 +52,39 @@ export function MapLayersSheet({
         </SheetHeader>
 
         <div className="flex flex-col gap-2 mt-6">
-          <Button onClick={onAddSourceClick} variant="outline" className="w-full justify-start">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Custom Map Source
-          </Button>
-          <Button onClick={onUploadMapClick} variant="outline" className="w-full justify-start">
-            <Upload className="w-4 h-4 mr-2" />
-            Upload Map Image
-          </Button>
+          <div className="grid grid-cols-2 gap-2">
+            <Button onClick={onAddSourceClick} variant="outline" className="justify-start">
+              <Plus className="w-4 h-4" />
+              <span className="ml-2">Add Source</span>
+            </Button>
+            <Button onClick={onUploadMapClick} variant="outline" className="justify-start">
+              <Upload className="w-4 h-4" />
+              <span className="ml-2">Upload Map</span>
+            </Button>
+          </div>
+          
+          <Separator className="my-2" />
+          
+          <div className="grid grid-cols-2 gap-2">
+            <Button 
+              onClick={onExportCollectionClick} 
+              variant="secondary" 
+              className="justify-start"
+              disabled={totalItems === 0}
+            >
+              <DownloadSimple className="w-4 h-4" />
+              <span className="ml-2">Export</span>
+            </Button>
+            <Button onClick={onImportCollectionClick} variant="secondary" className="justify-start">
+              <UploadSimple className="w-4 h-4" />
+              <span className="ml-2">Import</span>
+            </Button>
+          </div>
         </div>
 
         <Separator className="my-6" />
 
-        <ScrollArea className="h-[calc(100vh-280px)]">
+        <ScrollArea className="h-[calc(100vh-340px)]">
           <div className="space-y-6">
             <div>
               <div className="flex items-center gap-2 mb-3">

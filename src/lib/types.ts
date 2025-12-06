@@ -67,3 +67,14 @@ export interface UploadedMap {
   }
   createdAt: number
 }
+
+export interface MapCollection {
+  id: string
+  name: string
+  description?: string
+  customSources: CustomMapSource[]
+  uploadedMaps: UploadedMap[]
+  createdAt: number
+  exportedAt: number
+  version: string
+}

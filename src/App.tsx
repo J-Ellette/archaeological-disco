@@ -7,11 +7,14 @@ import { SaveDiscoveryDialog } from '@/components/SaveDiscoveryDialog'
 import { MapLayersSheet } from '@/components/MapLayersSheet'
 import { AddMapSourceDialog } from '@/components/AddMapSourceDialog'
 import { UploadMapDialog } from '@/components/UploadMapDialog'
+import { ExportCollectionDialog } from '@/components/ExportCollectionDialog'
+import { ImportCollectionDialog } from '@/components/ImportCollectionDialog'
 import { Button } from '@/components/ui/button'
 import { Toaster, toast } from 'sonner'
-import { ArchaeologicalSite, Discovery, CustomMapSource, UploadedMap } from '@/lib/types'
+import { ArchaeologicalSite, Discovery, CustomMapSource, UploadedMap, MapCollection } from '@/lib/types'
 import { archaeologicalSites } from '@/lib/archaeological-sites'
 import { calculateAreaFromBounds } from '@/lib/geo-utils'
+import { mergeCollections } from '@/lib/collection-utils'
 import {
   CursorClick,
   FolderOpen,
@@ -30,6 +33,8 @@ function App() {
   const [mapLayersOpen, setMapLayersOpen] = useState(false)
   const [addSourceDialogOpen, setAddSourceDialogOpen] = useState(false)
   const [uploadMapDialogOpen, setUploadMapDialogOpen] = useState(false)
+  const [exportCollectionOpen, setExportCollectionOpen] = useState(false)
+  const [importCollectionOpen, setImportCollectionOpen] = useState(false)
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
   const [drawMode, setDrawMode] = useState<'none' | 'rectangle'>('none')
   const [pendingBounds, setPendingBounds] = useState<{
@@ -116,6 +121,34 @@ function App() {
   const handleDeleteUpload = (id: string) => {
     setUploadedMaps((current) => (current || []).filter((m) => m.id !== id))
     toast.success('Map deleted')
+  }
+
+  const handleImportCollection = (
+    collection: MapCollection,
+    options: { skipDuplicates: boolean; renameConflicts: boolean }
+  ) => {
+    const result = mergeCollections(
+      customSources || [],
+      uploadedMaps || [],
+      collection,
+      options
+    )
+
+    setCustomSources(() => result.sources)
+    setUploadedMaps(() => result.maps)
+
+    const { stats } = result
+    const messages: string[] = []
+    if (stats.sourcesAdded > 0) messages.push(`${stats.sourcesAdded} source(s)`)
+    if (stats.mapsAdded > 0) messages.push(`${stats.mapsAdded} map(s)`)
+    
+    if (messages.length > 0) {
+      toast.success(`Imported ${messages.join(' and ')}`)
+    }
+
+    if (stats.sourcesSkipped > 0 || stats.mapsSkipped > 0) {
+      toast.info(`Skipped ${stats.sourcesSkipped + stats.mapsSkipped} duplicate(s)`)
+    }
   }
 
   return (
@@ -235,6 +268,14 @@ function App() {
           setMapLayersOpen(false)
           setUploadMapDialogOpen(true)
         }}
+        onExportCollectionClick={() => {
+          setMapLayersOpen(false)
+          setExportCollectionOpen(true)
+        }}
+        onImportCollectionClick={() => {
+          setMapLayersOpen(false)
+          setImportCollectionOpen(true)
+        }}
       />
 
       <AddMapSourceDialog
@@ -247,6 +288,19 @@ function App() {
         open={uploadMapDialogOpen}
         onOpenChange={setUploadMapDialogOpen}
         onUpload={handleUploadMap}
+      />
+
+      <ExportCollectionDialog
+        open={exportCollectionOpen}
+        onOpenChange={setExportCollectionOpen}
+        customSources={customSources || []}
+        uploadedMaps={uploadedMaps || []}
+      />
+
+      <ImportCollectionDialog
+        open={importCollectionOpen}
+        onOpenChange={setImportCollectionOpen}
+        onImport={handleImportCollection}
       />
     </div>
   )
