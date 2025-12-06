@@ -78,3 +78,30 @@ export interface MapCollection {
   exportedAt: number
   version: string
 }
+
+export interface MarketplaceListing {
+  id: string
+  collectionId: string
+  name: string
+  description?: string
+  author: {
+    login: string
+    avatarUrl: string
+  }
+  tags: string[]
+  sourceCount: number
+  mapCount: number
+  downloads: number
+  rating: number
+  ratingCount: number
+  publishedAt: number
+  updatedAt: number
+  collection: MapCollection
+}
+
+export interface UserRating {
+  listingId: string
+  userId: string
+  rating: number
+  createdAt: number
+}
