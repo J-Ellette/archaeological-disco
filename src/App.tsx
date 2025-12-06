@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import { useState } from 'react'
-import { useLocalStorage } from '@/hooks/use-local-storage'
-=======
 import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
->>>>>>> 7b05a1aaec880953619a31d95c22b6cc0510662f
 import { Map } from '@/components/Map'
 import { SiteInfoSheet } from '@/components/SiteInfoSheet'
 import { DiscoveryManager } from '@/components/DiscoveryManager'
@@ -35,17 +30,11 @@ import {
 } from '@phosphor-icons/react'
 
 function App() {
-<<<<<<< HEAD
-  const [discoveries, setDiscoveries] = useLocalStorage<Discovery[]>('discoveries', [])
-  const [customSources, setCustomSources] = useLocalStorage<CustomMapSource[]>('custom-sources', [])
-  const [uploadedMaps, setUploadedMaps] = useLocalStorage<UploadedMap[]>('uploaded-maps', [])
-=======
   const [discoveries, setDiscoveries] = useKV<Discovery[]>('discoveries', [])
   const [customSources, setCustomSources] = useKV<CustomMapSource[]>('custom-sources', [])
   const [uploadedMaps, setUploadedMaps] = useKV<UploadedMap[]>('uploaded-maps', [])
   const [marketplaceListings, setMarketplaceListings] = useKV<MarketplaceListing[]>('marketplace-listings', [])
   const [userRatings, setUserRatings] = useKV<UserRating[]>('user-ratings', [])
->>>>>>> 7b05a1aaec880953619a31d95c22b6cc0510662f
   const [selectedSite, setSelectedSite] = useState<ArchaeologicalSite | null>(null)
   const [siteSheetOpen, setSiteSheetOpen] = useState(false)
   const [discoveryManagerOpen, setDiscoveryManagerOpen] = useState(false)
@@ -70,7 +59,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState<{ login: string; avatarUrl: string } | null>(null)
 
   useEffect(() => {
-    window.spark.user().then((user) => {
+    (window as any).spark.user().then((user: any) => {
       if (user) {
         setCurrentUser({
           login: user.login,
