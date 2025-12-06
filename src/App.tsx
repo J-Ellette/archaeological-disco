@@ -1,5 +1,172 @@
+import { useState } from 'react'
+import { useKV } from '@github/spark/hooks'
+import { Map } from '@/components/Map'
+import { SiteInfoSheet } from '@/components/SiteInfoSheet'
+import { DiscoveryManager } from '@/components/DiscoveryManager'
+import { SaveDiscoveryDialog } from '@/components/SaveDiscoveryDialog'
+import { Button } from '@/components/ui/button'
+import { Toaster, toast } from 'sonner'
+import { ArchaeologicalSite, Discovery } from '@/lib/types'
+import { archaeologicalSites } from '@/lib/archaeological-sites'
+import { calculateAreaFromBounds } from '@/lib/geo-utils'
+import {
+  CursorClick,
+  BookmarkSimple,
+  FolderOpen,
+  List,
+  X
+} from '@phosphor-icons/react'
+
 function App() {
-    return <div></div>
+  const [discoveries, setDiscoveries] = useKV<Discovery[]>('discoveries', [])
+  const [selectedSite, setSelectedSite] = useState<ArchaeologicalSite | null>(null)
+  const [siteSheetOpen, setSiteSheetOpen] = useState(false)
+  const [discoveryManagerOpen, setDiscoveryManagerOpen] = useState(false)
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false)
+  const [drawMode, setDrawMode] = useState<'none' | 'rectangle'>('none')
+  const [pendingBounds, setPendingBounds] = useState<{
+    north: number
+    south: number
+    east: number
+    west: number
+  } | null>(null)
+  const [sitesVisible, setSitesVisible] = useState(true)
+
+  const handleSiteClick = (site: ArchaeologicalSite) => {
+    setSelectedSite(site)
+    setSiteSheetOpen(true)
+  }
+
+  const handleBoundsDrawn = (bounds: { north: number; south: number; east: number; west: number }) => {
+    setPendingBounds(bounds)
+    setSaveDialogOpen(true)
+    setDrawMode('none')
+  }
+
+  const handleSaveDiscovery = (data: { title: string; notes: string; tags: string[] }) => {
+    if (!pendingBounds) return
+
+    const area = calculateAreaFromBounds(pendingBounds)
+    const now = Date.now()
+
+    const newDiscovery: Discovery = {
+      id: `discovery-${now}`,
+      title: data.title,
+      notes: data.notes,
+      tags: data.tags,
+      bounds: pendingBounds,
+      area,
+      createdAt: now,
+      updatedAt: now
+    }
+
+    setDiscoveries((current) => [...(current || []), newDiscovery])
+    setPendingBounds(null)
+    setSaveDialogOpen(false)
+    toast.success('Discovery saved successfully!')
+  }
+
+  const handleDeleteDiscovery = (id: string) => {
+    setDiscoveries((current) => (current || []).filter((d) => d.id !== id))
+    toast.success('Discovery deleted')
+  }
+
+  const handleSelectDiscovery = (discovery: Discovery) => {
+    toast.info(`Viewing: ${discovery.title}`)
+    setDiscoveryManagerOpen(false)
+  }
+
+  const toggleDrawMode = () => {
+    setDrawMode((current) => (current === 'none' ? 'rectangle' : 'none'))
+  }
+
+  return (
+    <div className="h-screen w-screen flex flex-col overflow-hidden">
+      <Toaster position="top-center" />
+
+      <header className="bg-card border-b border-border px-4 py-3 flex items-center justify-between gap-4 z-10 shadow-sm">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">Archaeological Discovery Explorer</h1>
+          <p className="text-xs text-muted-foreground">Explore ancient sites and discover new features</p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant={sitesVisible ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSitesVisible(!sitesVisible)}
+            className="hidden sm:flex"
+          >
+            <List className="w-4 h-4" />
+            <span className="ml-2">{sitesVisible ? 'Hide' : 'Show'} Sites</span>
+          </Button>
+
+          <Button
+            variant={drawMode === 'rectangle' ? 'default' : 'outline'}
+            size="sm"
+            onClick={toggleDrawMode}
+          >
+            {drawMode === 'rectangle' ? (
+              <>
+                <X className="w-4 h-4" />
+                <span className="ml-2">Cancel</span>
+              </>
+            ) : (
+              <>
+                <CursorClick className="w-4 h-4" />
+                <span className="ml-2">Draw AOI</span>
+              </>
+            )}
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setDiscoveryManagerOpen(true)}
+          >
+            <FolderOpen className="w-4 h-4" />
+            <span className="ml-2 hidden sm:inline">Discoveries</span>
+            {(discoveries && discoveries.length > 0) && (
+              <span className="ml-1.5 bg-accent text-accent-foreground rounded-full px-1.5 py-0.5 text-xs font-semibold">
+                {discoveries.length}
+              </span>
+            )}
+          </Button>
+        </div>
+      </header>
+
+      <main className="flex-1 relative">
+        <Map
+          sites={sitesVisible ? archaeologicalSites : []}
+          onSiteClick={handleSiteClick}
+          onBoundsDrawn={handleBoundsDrawn}
+          drawMode={drawMode}
+          selectedSiteId={selectedSite?.id}
+        />
+      </main>
+
+      <SiteInfoSheet
+        site={selectedSite}
+        open={siteSheetOpen}
+        onOpenChange={setSiteSheetOpen}
+      />
+
+      <DiscoveryManager
+        discoveries={discoveries || []}
+        open={discoveryManagerOpen}
+        onOpenChange={setDiscoveryManagerOpen}
+        onDelete={handleDeleteDiscovery}
+        onSelect={handleSelectDiscovery}
+      />
+
+      <SaveDiscoveryDialog
+        open={saveDialogOpen}
+        onOpenChange={setSaveDialogOpen}
+        onSave={handleSaveDiscovery}
+        area={pendingBounds ? calculateAreaFromBounds(pendingBounds) : 0}
+      />
+    </div>
+  )
 }
 
 export default App
