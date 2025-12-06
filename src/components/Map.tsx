@@ -26,6 +26,11 @@ const baseLayers = {
     name: 'Terrain',
     url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
     attribution: '© OpenTopoMap'
+  },
+  lidar: {
+    name: 'LiDAR',
+    url: 'https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}.png',
+    attribution: '© Stadia Maps © Stamen Design © OpenMapTiles'
   }
 }
 
@@ -34,7 +39,7 @@ export function Map({ sites, onSiteClick, onBoundsDrawn, drawMode, selectedSiteI
   const mapInstanceRef = useRef<L.Map | null>(null)
   const markersRef = useRef<{ [key: string]: L.Marker }>({})
   const rectangleRef = useRef<L.Rectangle | null>(null)
-  const [currentLayer, setCurrentLayer] = useState<'street' | 'satellite' | 'terrain'>('terrain')
+  const [currentLayer, setCurrentLayer] = useState<'street' | 'satellite' | 'terrain' | 'lidar'>('terrain')
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return
